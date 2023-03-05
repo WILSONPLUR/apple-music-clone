@@ -5,6 +5,7 @@ import axios from "axios";
 import { useQuery } from "react-query";
 import Head from "next/head";
 import { Sidebar } from "@components/sidebar";
+import { useRouter } from "next/router";
 
 interface IArtists {
     artists: [{ alias: string; id: string; adamid: string }];
@@ -34,7 +35,7 @@ interface ISongs {
     tracks: ISong[];
 }
 
-const Home: React.FC = () => {
+const BrowsePage: React.FC = () => {
     const [songIndex, setSongIndex] = useState(0);
     const [disabledPlayer, setDisabledPlayer] = useState<boolean>(true);
     const [selectedSong, setSelectedSong] = useState<ISong>({
@@ -55,6 +56,7 @@ const Home: React.FC = () => {
             ],
         },
     });
+    const router = useRouter();
     const playSong = (type: "next" | "prev") => {
         if (type === "next") {
             setSongIndex((prevSongIndex: number) => ++prevSongIndex);
@@ -82,7 +84,29 @@ const Home: React.FC = () => {
     };
     const { data, error, isLoading } = useQuery("songs", getSongs);
     console.log(data);
-    return <>Home</>;
+    return (
+        <Container>
+            <Head>
+                <title>iCarrot Music</title>
+            </Head>
+            <Header
+                disabledPlayer={disabledPlayer}
+                song={selectedSong.hub.actions[1].uri}
+                playSong={playSong}
+            />
+            <Main>
+                {!isLoading && !error && (
+                    <Cards
+                        songs={data.tracks}
+                        selectSong={setSelectedSong}
+                        disablePlayer={setDisabledPlayer}
+                    />
+                )}
+            </Main>
+            <Sidebar currentRoute={router.pathname} />
+            <Footer />
+        </Container>
+    );
 };
 
-export default Home;
+export default BrowsePage;
